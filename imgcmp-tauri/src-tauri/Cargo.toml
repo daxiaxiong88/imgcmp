@@ -1,0 +1,24 @@
+[package]
+name = "imgcmp-tauri"
+version = "1.1.0"
+description = "图片对比排列器 - 桌面版"
+authors = ["daxiaxiong88"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+base64 = "0.22"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# 体积优化：去符号 + LTO + 单编译单元 + 最小体积优先 + panic 直接中止
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+opt-level = "s"
+panic = "abort"

@@ -1,0 +1,33 @@
+{
+  "main": "index.html",
+  "logo": "logo.png",
+  "preload": "preload.js",
+  "pluginName": "图片对比",
+  "version": "1.1.0",
+  "description": "论文级多图对比排版：所见即所得导出，内置 Nature/Cell/PNAS/IEEE/Lancet 等 9 套期刊模板，面板标号自动生成，300DPI 论文尺寸导出",
+  "author": "daxiaxiong88",
+  "features": [
+    {
+      "code": "imgcmp",
+      "explain": "图片对比排列器",
+      "cmds": [
+        "图片对比",
+        "imgcmp",
+        "图片排列",
+        "对比图片"
+      ]
+    },
+    {
+      "code": "imgcmp-files",
+      "explain": "对比选中的图片",
+      "cmds": [
+        {
+          "type": "img",
+          "label": "图片对比",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      ]
+    }
+  ]
+}

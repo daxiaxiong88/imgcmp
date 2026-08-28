@@ -1,0 +1,13 @@
+# 本仓库仅包含 imgcmp 插件核心与 Tauri 桌面版，排除工作区其他内容
+/6a6af4e2ceaaa61c123bfeda/
+/imgcmp-promo/
+/OCR tool/
+
+# Tauri web/ 由 copy-web.js 从 imgcmp/ 自动同步生成
+/imgcmp-tauri/web/
+
+# 演示视频通过 GitHub Releases 分发，不入库
+*.mp4
+
+# 工作区临时截图
+/settings-panel-*.png.jpg

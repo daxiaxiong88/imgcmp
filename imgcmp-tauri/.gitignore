@@ -1,0 +1,13 @@
+# 依赖与构建产物
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+
+# 本地 Rust 镜像加速配置（个人网络环境，不上库）
+src-tauri/.cargo/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+*.log

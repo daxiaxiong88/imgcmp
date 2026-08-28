@@ -1,0 +1,13 @@
+{
+  "name": "imgcmp-tauri",
+  "version": "1.1.0",
+  "private": true,
+  "scripts": {
+    "copy-web": "node copy-web.js",
+    "build": "node copy-web.js && tauri build",
+    "dev": "node copy-web.js && tauri dev"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

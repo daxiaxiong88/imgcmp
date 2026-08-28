@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>图片对比排列器</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">▦</span>
+        <span class="brand-title">图片对比排列器</span>
+      </div>
+      <div class="mode-switch" role="tablist" aria-label="布局模式">
+        <button class="mode-btn active" data-mode="flow">流式</button>
+        <button class="mode-btn" data-mode="matrix">矩阵</button>
+        <button class="mode-btn" data-mode="ref">参考图</button>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="bg-toggle" title="切换画布背景">浅灰</button>
+        <button class="icon-btn" id="undo-btn" title="撤销 (Ctrl+Z)">↶</button>
+        <button class="icon-btn" id="redo-btn" title="重做 (Ctrl+Shift+Z)">↷</button>
+        <button class="primary-btn" id="export-btn" disabled>导出图片</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="canvas-area" id="canvas">
+        <div class="canvas-inner" id="canvas-inner">
+          <div class="empty-hint" id="empty-hint">
+            <div class="empty-icon">⊕</div>
+            <p>把图片拖到这里，或点击右侧"添加图片"</p>
+            <p class="empty-sub">支持 PNG / JPG / WebP / SVG / BMP / GIF</p>
+          </div>
+          <div class="grid-wrap" id="grid-wrap" hidden></div>
+          <div class="ref-wrap" id="ref-wrap" hidden>
+            <div class="ref-side" id="ref-side"></div>
+            <div class="ref-grid-wrap" id="ref-grid-wrap"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="settings">
+        <div class="card">
+          <h3 class="card-title">图片</h3>
+          <div class="card-row">
+            <button class="ghost-btn block" id="add-btn">＋ 添加图片</button>
+          </div>
+          <div class="card-row split">
+            <span class="muted" id="img-count">0 张</span>
+            <button class="ghost-btn small" id="clear-btn" disabled>清空全部</button>
+          </div>
+          <input type="file" id="file-input" multiple accept=".png,.jpg,.jpeg,.webp,.svg,.bmp,.gif" hidden />
+        </div>
+
+        <div class="card" id="preset-card">
+          <h3 class="card-title">排版预设</h3>
+          <div class="card-row">
+            <button class="ghost-btn block" id="preset-single" title="矩阵 2 列 + 导出 300DPI 单栏宽（89mm）">论文·单栏对比</button>
+          </div>
+          <div class="card-row">
+            <button class="ghost-btn block" id="preset-double" title="矩阵自适应列数 + 导出 300DPI 双栏通栏宽（183mm）">论文·双栏通栏</button>
+          </div>
+          <div class="card-row">
+            <button class="ghost-btn block" id="preset-ref" title="参考图模式 50% + 导出 300DPI 单栏宽">论文·单图参考</button>
+          </div>
+          <div class="card-row">
+            <select id="journal-preset" class="sel-input" title="按期刊作者指南核实的版心宽度与字体规范">
+              <option value="">期刊规格…</option>
+              <option value="nature1">Nature 单栏（89mm）</option>
+              <option value="nature2">Nature 双栏（183mm）</option>
+              <option value="pnas1">PNAS 单栏（87mm）</option>
+              <option value="pnas2">PNAS 通栏（178mm）</option>
+              <option value="ieee1">IEEE 单栏（88.9mm）</option>
+              <option value="ieee2">IEEE 双栏（182mm）</option>
+              <option value="cell2">Cell 双栏（174mm）</option>
+              <option value="acs2">ACS 双栏（177.8mm）</option>
+              <option value="lancet1">Lancet 单栏（107mm）</option>
+            </select>
+            <button class="ghost-btn small" id="journal-apply">应用</button>
+          </div>
+          <p class="muted small">期刊规格来自各刊作者指南核实值（2026-08）。选择后按图片数量自动排列，标号按该刊格式作为标题前缀，只需填写标题内容；图注写入稿件正文。</p>
+        </div>
+
+        <div class="card" id="layout-card">
+          <h3 class="card-title">布局</h3>
+          <div class="card-row">
+            <label class="row-label">列数</label>
+            <div class="slider-row">
+              <input type="range" id="cols-range" min="1" max="10" step="1" value="3" />
+              <input type="number" id="cols-num" min="1" max="10" step="1" value="3" class="num-input small" />
+            </div>
+          </div>
+          <div class="matrix-only" hidden>
+            <div class="card-row">
+              <label class="row-label">行数</label>
+              <div class="slider-row">
+                <input type="range" id="rows-range" min="1" max="10" step="1" value="2" />
+                <input type="number" id="rows-num" min="1" max="10" step="1" value="2" class="num-input small" />
+              </div>
+            </div>
+            <p class="muted small" id="matrix-capacity">矩阵容量 6 格</p>
+          </div>
+          <div class="ref-only" hidden>
+            <div class="card-row">
+              <label class="row-label">参考图宽度</label>
+              <div class="slider-row">
+                <input type="range" id="ref-range" min="25" max="75" step="5" value="50" />
+                <span class="num-input small readonly" id="ref-num">50%</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-row">
+            <label class="row-label">画面比例</label>
+            <select id="aspect-ratio" class="sel-input">
+              <option value="auto">自动适配</option>
+              <option value="4:3">4:3 经典</option>
+              <option value="1:1">1:1 方形</option>
+              <option value="3:4">3:4 竖版</option>
+              <option value="16:9">16:9 宽屏</option>
+              <option value="9:16">9:16 手机</option>
+            </select>
+          </div>
+          <p class="muted small" id="ratio-hint" hidden></p>
+          <div class="card-row">
+            <label class="row-label">行距</label>
+            <div class="slider-row">
+              <input type="range" id="rgap-range" min="0" max="100" step="1" value="16" />
+              <input type="number" id="rgap-num" min="0" max="100" step="1" value="16" class="num-input small" />
+            </div>
+          </div>
+          <div class="card-row">
+            <label class="row-label">水平间距</label>
+            <div class="slider-row">
+              <input type="range" id="cgap-range" min="0" max="100" step="1" value="16" />
+              <input type="number" id="cgap-num" min="0" max="100" step="1" value="16" class="num-input small" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">标题</h3>
+          <div class="card-row">
+            <label class="row-label">标题模式</label>
+            <select id="title-mode" class="sel-input">
+              <option value="single">每张图</option>
+              <option value="col">每列共用</option>
+              <option value="row">每行共用</option>
+              <option value="matrix" hidden>行列双标题</option>
+            </select>
+          </div>
+          <div class="card-row">
+            <label class="row-label">面板标号</label>
+            <select id="panel-label" class="sel-input" title="自动面板标号，作为标题前缀显示（如 (a) 标题内容），格式随期刊规范">
+              <option value="none">无</option>
+              <option value="lower">a b c（Nature 风格）</option>
+              <option value="upper">A B C（Cell/PNAS 风格）</option>
+              <option value="paren">(a) (b) (c)（IEEE 风格）</option>
+              <option value="parenUpper">(A) (B) (C)（ACS 风格）</option>
+            </select>
+          </div>
+          <div class="card-row">
+            <label class="row-label">位置</label>
+            <div class="seg">
+              <button class="seg-btn active" data-pos="top">上</button>
+              <button class="seg-btn" data-pos="bottom">下</button>
+            </div>
+          </div>
+          <div class="card-row">
+            <label class="row-label">对齐</label>
+            <select id="title-align" class="sel-input" title="标题内容水平对齐方式">
+              <option value="left">靠左</option>
+              <option value="center">居中</option>
+              <option value="right">靠右</option>
+            </select>
+          </div>
+          <div class="card-row">
+            <label class="row-label">字体</label>
+            <select id="title-font" class="sel-input">
+              <option value="sans">思源黑体</option>
+              <option value="serif">思源宋体</option>
+              <option value="yahei">微软雅黑</option>
+              <option value="pingfang">等线 / PingFang</option>
+              <option value="times">Times New Roman</option>
+              <option value="mono">等宽 JetBrains Mono</option>
+            </select>
+          </div>
+          <div class="card-row">
+            <label class="row-label">字号</label>
+            <div class="slider-row">
+              <input type="range" id="fs-range" min="12" max="48" step="1" value="16" />
+              <input type="number" id="fs-num" min="12" max="48" step="1" value="16" class="num-input small" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">导出</h3>
+          <div class="card-row">
+            <label class="row-label">导出尺寸</label>
+            <select id="export-scale" class="sel-input">
+              <option value="w1028">PNAS 单栏 87mm@300DPI</option>
+              <option value="w1051">Nature/IEEE 单栏 89mm@300DPI</option>
+              <option value="w1264">Lancet 单栏 107mm@300DPI</option>
+              <option value="w1346">PNAS/Cell 中栏 114mm@300DPI</option>
+              <option value="w2055">Cell 双栏 174mm@300DPI</option>
+              <option value="w2102">PNAS/ACS 通栏 178mm@300DPI</option>
+              <option value="w2150">IEEE 双栏 182mm@300DPI</option>
+              <option value="w2161">Nature 双栏 183mm@300DPI</option>
+              <option value="1">标准 1x</option>
+              <option value="2">高清 2x</option>
+              <option value="0">原图拼合</option>
+            </select>
+          </div>
+          <div class="card-row">
+            <label class="row-label">格式</label>
+            <select id="export-format" class="sel-input">
+              <option value="png">PNG 无损</option>
+              <option value="jpeg-92">JPEG 92%（推荐）</option>
+              <option value="jpeg-85">JPEG 85%（更小）</option>
+            </select>
+          </div>
+          <p class="muted small">照片类图片选 JPEG 体积可降 60–80%；截图/UI 图保持 PNG。文件名自动带时间戳。</p>
+        </div>
+      </aside>
+    </main>
+
+    <div class="overlay" id="restore-overlay" hidden>
+      <div class="overlay-card">
+        <p>检测到上次的对比项目（<span id="restore-count">0</span> 张图），是否恢复？</p>
+        <div class="overlay-actions">
+          <button class="primary-btn" id="restore-yes">恢复</button>
+          <button class="ghost-btn" id="restore-no">重新开始</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="utools.adapter.js"></script>
+  <script src="tauri.adapter.js"></script>
+  <script src="platform.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
