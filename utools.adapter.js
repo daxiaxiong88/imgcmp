@@ -4,7 +4,28 @@
   function createUToolsPlatform() {
     const bridge = window.uToolsBridge
 
-    return {
+    const enter = { images: null, command: null }
+    // uTools 只允许注册一个 onPluginEnter，这里统一分发：
+    // 反馈命令（imgcmp-feedback）直接唤起反馈弹窗，其余按图片载荷处理
+    bridge.onPluginEnter(payload => {
+      const code = payload && payload.code
+      if (code === 'imgcmp-feedback') {
+        if (enter.command) enter.command()
+        return
+      }
+      if (enter.images) {
+        const items = (payload && Array.isArray(payload.payload)) ? payload.payload : []
+        const paths = []
+        for (const it of items) {
+          if (it && it.path) paths.push(it.path)
+          else if (it && it.dataURL) paths.push(it.dataURL)
+          else if (typeof it === 'string') paths.push(it)
+        }
+        if (paths.length) enter.images(paths)
+      }
+    })
+
+    const platform = {
       name: 'utools',
       canReadPath: true,
       canSaveToPath: true,
@@ -62,19 +83,15 @@
       },
 
       onEnterImages(cb) {
-        bridge.onPluginEnter(payload => {
-          const items = (payload && Array.isArray(payload.payload)) ? payload.payload : []
-          if (!items.length) return
-          const paths = []
-          for (const it of items) {
-            if (it && it.path) paths.push(it.path)
-            else if (it && it.dataURL) paths.push(it.dataURL)
-            else if (typeof it === 'string') paths.push(it)
-          }
-          if (paths.length) cb(paths)
-        })
+        enter.images = cb
+      },
+
+      onCommand(cb) {
+        enter.command = cb
       }
     }
+
+    return platform
   }
 
   window.createUToolsPlatform = createUToolsPlatform
