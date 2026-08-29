@@ -1174,6 +1174,12 @@
     window.platform.onEnterImages(paths => {
       if (paths && paths.length) addImagesFromPaths(paths)
     })
+    // uTools 反馈命令：直接唤起反馈弹窗
+    if (typeof window.platform.onCommand === 'function') {
+      window.platform.onCommand(() => {
+        if (typeof window.openFeedback === 'function') window.openFeedback()
+      })
+    }
   }
 
   function bootstrap() {

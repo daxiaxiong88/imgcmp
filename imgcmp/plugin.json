@@ -28,6 +28,14 @@
           "maxLength": 50
         }
       ]
+    },
+    {
+      "code": "imgcmp-feedback",
+      "explain": "反馈建议",
+      "cmds": [
+        "反馈建议",
+        "反馈"
+      ]
     }
   ]
 }

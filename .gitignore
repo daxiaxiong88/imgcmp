@@ -2,6 +2,10 @@
 /6a6af4e2ceaaa61c123bfeda/
 /imgcmp-promo/
 /OCR tool/
+/imgcmp-miniprogram/
+
+# 工作区工具生成的记忆/缓存
+/.workbuddy/
 
 # Tauri web/ 由 copy-web.js 从 imgcmp/ 自动同步生成
 /imgcmp-tauri/web/

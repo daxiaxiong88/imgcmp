@@ -238,6 +238,36 @@
     </div>
   </div>
 
+  <!-- 反馈入口：左下角悬浮按钮 + 应用内弹窗，直接提交到 FormSubmit 转发邮箱 -->
+  <button class="feedback-fab" id="feedback-btn" title="反馈建议">反馈</button>
+
+  <div class="overlay" id="feedback-modal" hidden>
+    <div class="overlay-card feedback-card">
+      <h3 class="feedback-title">反馈建议</h3>
+      <p class="feedback-sub">你的意见会帮助我把这个工具做得更好</p>
+      <div class="card-row">
+        <label class="row-label">类型</label>
+        <select id="fb-type" class="sel-input">
+          <option value="功能建议">功能建议</option>
+          <option value="Bug 报告">Bug 报告</option>
+          <option value="使用疑问">使用疑问</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+      <textarea id="fb-message" class="feedback-textarea" rows="4" placeholder="请描述你的问题或建议…"></textarea>
+      <div class="card-row">
+        <label class="row-label">联系方式</label>
+        <input id="fb-contact" class="sel-input" type="text" placeholder="选填，便于回复（微信 / 邮箱）" />
+      </div>
+      <p class="muted small">平台与版本号已自动附带，无需手动填写。</p>
+      <div class="overlay-actions">
+        <button class="ghost-btn" id="fb-cancel">取消</button>
+        <button class="primary-btn" id="fb-submit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="feedback.js"></script>
   <script src="utools.adapter.js"></script>
   <script src="tauri.adapter.js"></script>
   <script src="platform.js"></script>

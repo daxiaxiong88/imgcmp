@@ -12,6 +12,7 @@ const FILES = [
   'platform.js',
   'utools.adapter.js',
   'tauri.adapter.js',
+  'feedback.js',
   'logo.png'
 ]
 
