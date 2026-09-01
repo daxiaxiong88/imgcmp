@@ -2,6 +2,9 @@
 
 论文级多图对比排版工具：拖入图片，所见即所得排版，一键导出符合期刊规范的多面板对比图。
 
+[![Website](https://img.shields.io/badge/🌐_在线使用-daxiaxiong88.github.io%2Fzhxiong-3171c4?style=for-the-badge)](https://daxiaxiong88.github.io/imgcmp/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-项目内容-2e7d32?style=for-the-badge&logo=github)](https://github.com/daxiaxiong88/imgcmp)
+
 ## 演示
 
 https://github.com/user-attachments/assets/6d9c3cf1-a9dc-40af-a9f8-b556865b786b
