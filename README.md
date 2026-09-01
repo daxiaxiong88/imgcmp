@@ -4,7 +4,7 @@
 
 ## 演示
 
-![演示视频](imgcmp/screenshots/imgcmp-promo-v4.mp4)
+![演示视频](https://github.com/user-attachments/assets/6d9c3cf1-a9dc-40af-a9f8-b556865b786b)
 
 <details>
 <summary>静态截图（Nature 双栏模板）</summary>

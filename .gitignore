@@ -10,9 +10,8 @@
 # Tauri web/ 由 copy-web.js 从 imgcmp/ 自动同步生成
 /imgcmp-tauri/web/
 
-# 演示视频：README 展示用的正片入库，其余 mp4 不入库
+# 演示视频通过 GitHub Releases / user-attachments 分发，不入库
 *.mp4
-!imgcmp/screenshots/imgcmp-promo-v4.mp4
 
 # 系统崩溃日志等临时文件
 *.log
