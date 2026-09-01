@@ -13,5 +13,8 @@
 # 演示视频通过 GitHub Releases 分发，不入库
 *.mp4
 
+# 系统崩溃日志等临时文件
+*.log
+
 # 工作区临时截图
 /settings-panel-*.png.jpg
