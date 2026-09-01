@@ -2,7 +2,16 @@
 
 论文级多图对比排版工具：拖入图片，所见即所得排版，一键导出符合期刊规范的多面板对比图。
 
+## 演示
+
+![演示视频](https://github.com/daxiaxiong88/imgcmp/releases/download/v1.1.0/imgcmp-promo-demo-30s.mp4)
+
+<details>
+<summary>静态截图（Nature 双栏模板）</summary>
+
 ![示例](imgcmp/screenshots/05-nature.png)
+
+</details>
 
 ## 核心特性
 
