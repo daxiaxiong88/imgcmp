@@ -133,6 +133,9 @@ html, body, #app {
   font-family: var(--title-font, sans); font-size: var(--fs, 16px);
   color: var(--text); background: transparent; border: none; border-bottom: 1px dashed transparent;
   padding: 4px 4px 6px; outline: none; text-align: center; width: 100%;
+  /* 标题为自适应 textarea：完整换行显示（break-all 与导出 wrapLines 断行一致），
+     行高 1.4 与导出逐行绘制对齐；height 由 fitTextareaHeight 按内容撑开 */
+  line-height: 1.4; word-break: break-all; resize: none; overflow: hidden;
   -webkit-user-select: text; user-select: text;
 }
 .tile-title::placeholder { color: #b6bcc4; }
@@ -254,6 +257,8 @@ html, body, #app {
   border-bottom: 1px dashed transparent; outline: none;
   -webkit-user-select: text; user-select: text;
   padding: 4px;
+  /* 轴标题为自适应 textarea：可换行、行高 1.4 与导出逐行绘制对齐 */
+  line-height: 1.4; word-break: break-all; resize: none; overflow: hidden;
 }
 .axis-input:focus { border-bottom-color: var(--primary); background: var(--panel-2); }
 

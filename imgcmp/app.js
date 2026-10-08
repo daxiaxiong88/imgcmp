@@ -274,19 +274,29 @@
     }
   }
 
+  // textarea 自适应高度：标题在屏幕端完整换行显示（断行与导出端 wrapLines 一致），
+  // 元素高度恒等于内容高度 —— 导出按真实 DOM 矩形量测，多行几何自动成立
+  function fitTextareaHeight(el) {
+    el.style.height = 'auto'
+    el.style.height = el.scrollHeight + 'px'
+  }
+
   function makeAxisInput(kind, index, value, placeholder) {
-    const inp = document.createElement('input')
-    inp.type = 'text'
+    const inp = document.createElement('textarea')
+    inp.rows = 1
     inp.className = 'axis-input'
     inp.dataset.axis = kind
     inp.dataset.index = String(index)
     inp.value = value
     inp.placeholder = placeholder
+    inp.spellcheck = false
     inp.addEventListener('input', () => {
       if (kind === 'col') state.colTitles[index] = inp.value
       else state.rowTitles[index] = inp.value
+      fitTextareaHeight(inp)
       autosave()
     })
+    requestAnimationFrame(() => fitTextareaHeight(inp))
     return inp
   }
 
@@ -422,16 +432,18 @@
         titleBar.appendChild(pre)
       }
       if (showTitle) {
-        titleInput = document.createElement('input')
-        titleInput.type = 'text'
+        titleInput = document.createElement('textarea')
+        titleInput.rows = 1
         titleInput.className = 'tile-title'
         titleInput.value = state.titles[titleKey] || ''
         titleInput.placeholder = labelText ? '标题内容...' : '输入标题...'
         titleInput.dataset.key = titleKey
+        titleInput.spellcheck = false
         // 无标题且无标号时不显示标题栏；标号开启时始终显示（期刊面板必有标号）
         if (!hasTitleText && !labelText) titleBar.classList.add('tile-title-empty')
         titleInput.addEventListener('input', () => {
           state.titles[titleKey] = titleInput.value
+          fitTextareaHeight(titleInput)
           autosave()
         })
         titleInput.addEventListener('blur', () => {
@@ -442,6 +454,8 @@
           }
         })
         titleBar.appendChild(titleInput)
+        // 入 DOM 后按内容撑开高度（长标题完整多行显示，导出量测矩形即文本块）
+        requestAnimationFrame(() => fitTextareaHeight(titleInput))
       }
       // 纯标号栏（labelOnly）始终显示，无需输入框
       tile.appendChild(titleBar)
@@ -918,6 +932,47 @@
     // 画布底色跟随"浅灰/纯白"开关，与屏幕端 --canvas-bg 一致
     ctx.fillStyle = state.bgLight ? '#eceef0' : '#ffffff'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
+    // 先设好目标字号再建量宽器：探针必须按实际绘制字号校验 measureText 的可信度
+    ctx.font = (fs * scale) + 'px ' + font
+
+    // 文本宽度测量：与小程序端 createTextMeasurer 同源 —— 个别环境 measureText 不随
+    // ctx.font 生效（按默认字号量宽），长标题会被量成"一行放得下"→ 导出不换行、只剩一行被截断。
+    // 用 20 字 CJK 探针校验（CJK 字宽 ≈ 1em）：测量值偏离估算 >30% 即判不可信，
+    // 退化为按字宽估算 —— CJK/全角 ≈1em，ASCII ≈0.55em，空格 ≈0.3em（略保守，宁早断行不截断）
+    const createTextMeasurer = (c, em) => {
+      let measure = null
+      try {
+        const probe = '测测测测测测测测测测测测测测测测测测测测'
+        const est = probe.length * em
+        const pw = Number(c.measureText(probe).width)
+        if (isFinite(pw) && pw > 0 && Math.abs(pw - est) / est < 0.3) measure = s => Number(c.measureText(s).width)
+      } catch (e) {}
+      if (measure) return measure
+      return s => {
+        let w = 0
+        for (const ch of String(s)) {
+          const c2 = ch.codePointAt(0)
+          w += c2 > 0x2e7f ? 1 : (ch === ' ' ? 0.3 : 0.55)
+        }
+        return w * em
+      }
+    }
+    const measureTextWidth = createTextMeasurer(ctx, fs * scale)
+
+    // 文本换行：与屏幕端 word-break: break-all 一致，逐字贪心断行（中英文混排通用），
+    // 支持手动 \n 强制分行
+    const wrapLines = (text, maxWidth) => {
+      const lines = []
+      let line = ''
+      for (const ch of String(text || '')) {
+        if (ch === '\n') { lines.push(line); line = ''; continue }
+        const test = line + ch
+        if (line && measureTextWidth(test) > maxWidth) { lines.push(line); line = ch }
+        else line = test
+      }
+      lines.push(line)
+      return lines
+    }
 
     const drawText = (text, r) => {
       const v = (text || '').trim()
@@ -926,7 +981,13 @@
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillStyle = '#1f2329'
-      ctx.fillText(v, margin + (r.x + r.w / 2) * scale, margin + (r.y + r.h / 2) * scale)
+      // 列/行标题与屏幕端一致可换行；矩形可能被网格拉伸得比内容高，整块垂直居中
+      const lines = wrapLines(v, r.w * scale)
+      const lh = fs * 1.4 * scale
+      const cy = margin + (r.y + r.h / 2) * scale
+      lines.forEach((ln, i) => {
+        ctx.fillText(ln, margin + (r.x + r.w / 2) * scale, cy + (i - (lines.length - 1) / 2) * lh)
+      })
     }
 
     // 行列标题按真实位置绘制
@@ -974,8 +1035,14 @@
           if (align === 'center') ctx.textAlign = 'center'
           else if (align === 'right') ctx.textAlign = 'right'
           else ctx.textAlign = 'left'
+          // 与屏幕端一致：标题超宽自动换行（行高 1.4 对齐 CSS line-height）。
+          // textarea 自适应高度使量测矩形即文本块，按顶部逐行绘制；单行时与旧"取中心"等价
+          const lines = wrapLines(v, ir.w * scale)
+          const lh = fs * 1.4 * scale
           const tx = align === 'center' ? ir.x + ir.w / 2 : (align === 'right' ? ir.x + ir.w : ir.x)
-          ctx.fillText(v, margin + tx * scale, margin + (ir.y + ir.h / 2) * scale)
+          lines.forEach((ln, i) => {
+            ctx.fillText(ln, margin + tx * scale, margin + ir.y * scale + lh * (i + 0.5))
+          })
         }
         if (pre) {
           const pr = rel(pre)
