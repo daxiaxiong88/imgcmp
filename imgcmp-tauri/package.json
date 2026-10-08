@@ -1,6 +1,6 @@
 {
   "name": "imgcmp-tauri",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "scripts": {
     "copy-web": "node copy-web.js",

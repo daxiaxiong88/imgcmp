@@ -1,6 +1,6 @@
 [package]
 name = "imgcmp-tauri"
-version = "1.1.0"
+version = "1.1.1"
 description = "图片对比排列器 - 桌面版"
 authors = ["daxiaxiong88"]
 edition = "2021"
